@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { User } from './user.entity';
@@ -51,4 +51,23 @@ describe('AuthService', () => {
       BadRequestException,
     );
   });
+
+  it('if user not found throw exception', async () => {
+    try {
+      await service.signIn('test@hjfs.com', 'test');
+    } catch (error) {
+      expect(error).toBeDefined();
+    }
+  });
+
+  // it('if user succesfullly signIn', async () => {
+  //   fakeUsersService.find = () =>
+  //     Promise.resolve([{ id: 1, email: 't', password: 't' } as User]);
+
+  //   const user = await service.signIn('test@hjfs.com', 'test');
+  //   expect(user.password).not.toEqual('test');
+  //   const [salt, hash] = user.password.split('.');
+  //   expect(salt).toBeDefined();
+  //   expect(hash).toBeDefined();
+  // });
 });
