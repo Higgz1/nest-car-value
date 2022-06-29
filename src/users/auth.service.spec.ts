@@ -17,16 +17,14 @@ describe('AuthService', () => {
         return Promise.resolve(userFilter);
       },
       create: (email: string, password: string) => {
-        users.push({
+        const testUser = {
           id: Math.floor(Math.random() * 1000),
           email,
           password,
-        } as User);
-        return Promise.resolve({
-          id: Math.floor(Math.random() * 1000),
-          email,
-          password,
-        } as User);
+        } as User;
+
+        users.push(testUser);
+        return Promise.resolve(testUser);
       },
     };
 
