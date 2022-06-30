@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { AuthService } from './auth.service';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
-import { AuthService } from './auth.service';
 import { User } from './user.entity';
 
 describe('UsersController', () => {
@@ -37,8 +37,14 @@ describe('UsersController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UsersController],
       providers: [
-        { provide: UsersService, useValue: fakeUsersService },
-        { provide: AuthService, useValue: fakeAuthService },
+        {
+          provide: UsersService,
+          useValue: fakeUsersService,
+        },
+        {
+          provide: AuthService,
+          useValue: fakeAuthService,
+        },
       ],
     }).compile();
 
@@ -58,7 +64,7 @@ describe('UsersController', () => {
     try {
       await controller.findAllUsers('test@jh.com');
     } catch (error) {
-      exp;
+      // exp;
     }
   });
 });

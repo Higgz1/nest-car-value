@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { User } from './user.entity';
@@ -9,11 +9,23 @@ describe('AuthService', () => {
   let fakeUsersService: Partial<UsersService>;
 
   beforeEach(async () => {
+    let users: User[] = [];
     // defined a fake usersService with the methods we use in the auth service
     fakeUsersService = {
-      find: () => Promise.resolve([]),
-      create: (email: string, password: string) =>
-        Promise.resolve({ id: 1, email, password } as User),
+      find: (email: string) => {
+        const userFilter = users.filter((user) => user.email === email);
+        return Promise.resolve(userFilter);
+      },
+      create: (email: string, password: string) => {
+        const testUser = {
+          id: Math.floor(Math.random() * 1000),
+          email,
+          password,
+        } as User;
+
+        users.push(testUser);
+        return Promise.resolve(testUser);
+      },
     };
 
     const module = await Test.createTestingModule({
@@ -41,14 +53,37 @@ describe('AuthService', () => {
     expect(hash).toBeDefined();
   });
 
-  it('throws an error', async () => {
-    // overide the fakeUsersService find method to return a user
-    fakeUsersService.find = () =>
-      Promise.resolve([{ id: 1, email: 't', password: 't' } as User]);
+  it('on signUp,throws an error if email is already in use', async () => {
+    await service.signUp('test@hjfs.com', 'test');
+    try {
+      await service.signUp('test@hjfs.com', 'test');
+    } catch (error) {
+      expect(error.message).toBe('user is in use');
+    }
+  });
 
-    // if there is a user , as we implemented we get an error. So we should get an error in this instance.
-    await expect(service.signUp('test@hjfs.com', 'test')).rejects.toThrow(
-      BadRequestException,
-    );
+  it('on signIn ,if user is not found throw exception', async () => {
+    try {
+      await service.signIn('4@hjfs.com', 'test');
+    } catch (error) {
+      expect(error).toBeDefined();
+    }
+  });
+
+  it('on signIn,if user has an invalid password should throw an error', async () => {
+    await service.signUp('test@hjfs.com', 'test');
+
+    try {
+      await service.signIn('test@hjfs.com', 'test1');
+    } catch (error) {
+      expect(error).toBeDefined();
+    }
+  });
+
+  it('finds correct user ', async () => {
+    await service.signUp('test1@hjfs.com', 'test');
+
+    const user = await service.signIn('test1@hjfs.com', 'test');
+    expect(user).toBeDefined();
   });
 });
