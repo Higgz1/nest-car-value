@@ -58,6 +58,8 @@ export class UsersController {
   @Get('/:id')
   async findUser(@Param('id') id: string) {
     const user = await this.userService.findOne(parseInt(id));
+    console.log(user);
+
     if (!user) {
       throw new NotFoundException('user not found');
     }
@@ -67,10 +69,12 @@ export class UsersController {
   @Get('')
   async findAllUsers(@Query('email') email: string) {
     const user = await this.userService.find(email);
-    if (!user) {
-      return new NotFoundException('USER NOT FOUND');
+    console.log(user.length);
+
+    if (user.length > 0) {
+      return user;
     }
-    return user;
+    return new NotFoundException('USER NOT FOUND');
   }
 
   @Patch('/:id')

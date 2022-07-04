@@ -61,10 +61,10 @@ describe('UsersController', () => {
   });
 
   it('should throw an error when no users are found', async () => {
-    try {
-      await controller.findAllUsers('test@jh.com');
-    } catch (error) {
-      // exp;
-    }
+    fakeUsersService.find = (email: string) => {
+      return Promise.resolve([]);
+    };
+
+    const user = await controller.findAllUsers('test@jh.com');
   });
 });
