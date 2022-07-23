@@ -6,16 +6,19 @@ import {
   Patch,
   Param,
   Get,
+  Query,
   NotFoundException,
 } from '@nestjs/common';
 import { AuthGuard } from '../guards/auth.guards';
 import { CreateReportDTO } from './dtos/create-report.dto';
+import { GetEstimateDto } from './dtos/get-estimate.dto';
 import { ReportsService } from './reports.service';
 import { CurrentUser } from '../users/decorators/current-user.decorator';
 import { User } from '../users/user.entity';
 import { Serialize } from '../interceptors/serialize.interceptor';
 import { ReportDto } from './dtos/report.dto';
 import { UpdateReportDto } from './dtos/update-report.dto';
+import { AdminGuard } from '../guards/admin.guard';
 
 @Controller('reports')
 export class ReportsController {
@@ -30,6 +33,7 @@ export class ReportsController {
   }
 
   @Patch('/:id')
+  @UseGuards(AdminGuard)
   async approveReport(@Param('id') id: string, @Body() body: UpdateReportDto) {
     const report = await this.reportsService.updateApproved(
       parseInt(id),
@@ -38,13 +42,8 @@ export class ReportsController {
     return report;
   }
 
-  @Get('/:id')
-  // @Serialize(ReportDto) //applied serializer to all routes in this entire controller
-  async getReport(@Param('id') id: string) {
-    const report = await this.reportsService.findOne(parseInt(id));
-    if (!report) {
-      throw new NotFoundException('Report not found');
-    }
-    return report;
+  @Get('')
+  async getEstimate(@Query() query: GetEstimateDto) {
+    return await this.reportsService.getEstimate(query);
   }
 }
